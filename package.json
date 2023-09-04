@@ -1,5 +1,5 @@
 {
-  "name": "gitcm",
+  "name": "@gitcm/cli",
   "version": "0.1.0",
   "description": "An opinionated git commits message helper.",
   "bin": {

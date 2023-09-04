@@ -5,7 +5,7 @@
 ## Installation
 
 ```bash
-npm install -g gitcm
+npm install -g @gitcm/cli
 ```
 
 ## Usage
