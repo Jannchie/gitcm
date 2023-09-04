@@ -1,0 +1,42 @@
+name: Create Tag on Version Update
+
+on:
+  push:
+    paths:
+      - 'package.json'
+      
+jobs:
+  create-tag:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
+      - name: Check for version update
+        id: check-version
+        run: |
+          CURRENT_VERSION=v$(node -p "require('./package.json').version")
+          PREVIOUS_VERSION=$(git describe --tags $(git rev-list --tags --max-count=1) 2>/dev/null || v0.0.0)
+          echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "previous_version=$PREVIOUS_VERSION" >> $GITHUB_OUTPUT
+          echo "Current version is $CURRENT_VERSION"
+          echo "Previous version is $PREVIOUS_VERSION"
+          
+      - name: Create tag if version updated
+        if: ${{ steps.check-version.outputs.current_version != steps.check-version.outputs.previous_version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Creating tag for version ${{ steps.check-version.outputs.current_version }}"
+          git tag ${{ steps.check-version.outputs.current_version }}
+          git push origin ${{ steps.check-version.outputs.current_version }}

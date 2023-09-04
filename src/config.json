@@ -1,0 +1,90 @@
+{
+  "showIcon": true,
+  "verbose": false,
+  "data": {
+    "feat": {
+      "display": "feat",
+      "emoji": ":sparkles:"
+    },
+    "chore": {
+      "display": "chore",
+      "emoji": ":wrench:"
+    },
+    "refactor": {
+      "display": "refactor",
+      "emoji": ":hammer:"
+    },
+    "fix": {
+      "display": "fix",
+      "emoji": ":bug:"
+    },
+    "hotfix": {
+      "display": "hotfix",
+      "emoji": ":ambulance:"
+    },
+    "docs": {
+      "display": "docs",
+      "emoji": ":books:"
+    },
+    "i18n": {
+      "display": "i18n",
+      "emoji": ":globe_with_meridians:"
+    },
+    "build": {
+      "display": "build",
+      "emoji": ":building_construction:"
+    },
+    "version": {
+      "display": "version",
+      "emoji": ":bookmark:"
+    },
+    "test": {
+      "display": "test",
+      "emoji": ":rotating_light:"
+    },
+    "ci": {
+      "display": "ci",
+      "emoji": ":construction_worker:"
+    },
+    "cd": {
+      "display": "cd",
+      "emoji": ":construction_worker:"
+    },
+    "workflow": {
+      "display": "workflow",
+      "emoji": ":construction_worker:"
+    },
+    "wip": {
+      "display": "wip",
+      "emoji": ":construction_worker:"
+    },
+    "init": {
+      "display": "init",
+      "emoji": ":tada:"
+    },
+    "style": {
+      "display": "style",
+      "emoji": ":art:"
+    },
+    "docker": {
+      "display": "docker",
+      "emoji": ":whale:"
+    },
+    "revert": {
+      "display": "revert",
+      "emoji": ":rewind:"
+    },
+    "config": {
+      "display": "config",
+      "emoji": ":wrench:"
+    },
+    "release": {
+      "display": "release",
+      "emoji": ":bookmark:"
+    },
+    "tag": {
+      "display": "tag",
+      "emoji": ":bookmark:"
+    }
+  }
+}

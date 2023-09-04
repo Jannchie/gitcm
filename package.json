@@ -1,0 +1,26 @@
+{
+  "name": "gitcm",
+  "version": "0.1.0",
+  "description": "An opinionated git commits message helper.",
+  "bin": {
+    "gitcm": "lib/index.js"
+  },
+  "scripts": {
+    "dev": "ts-node src/index.ts",
+    "build": "tsc",
+    "publish": "pnpm run build && pnpm publish"
+  },
+  "keywords": ["git", "commit", "message", "cli"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@antfu/eslint-config": "^0.41.0",
+    "@types/node": "^20.5.9",
+    "commander": "^11.0.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "consola": "^3.2.3"
+  }
+}
