@@ -11,7 +11,7 @@
     "publish": "pnpm run build && pnpm publish"
   },
   "keywords": ["git", "commit", "message", "cli"],
-  "author": "",
+  "author": "Jianqi Pan <jannchie@gmail.com>",
   "license": "MIT",
   "devDependencies": {
     "@antfu/eslint-config": "^0.41.0",
