@@ -3,6 +3,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { exec } from 'node:child_process'
+import os from 'node:os'
 import { program } from 'commander'
 import { consola } from 'consola'
 
@@ -25,7 +26,7 @@ program.parse()
 
 let config = defaultConfig
 
-const configPath = path.join(process.env.HOME ?? '~/', '.config/gitcm/config.json')
+const configPath = path.join(os.homedir(), '~/.config/gitcm/config.json')
 if (!fs.existsSync(configPath)) {
   const dir = path.dirname(configPath)
   fs.mkdirSync(dir, { recursive: true })
