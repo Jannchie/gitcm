@@ -16,7 +16,7 @@
     },
     "fix": {
       "display": "fix",
-      "emoji": ":bug:"
+      "emoji": ":adhesive_bandage:"
     },
     "hotfix": {
       "display": "hotfix",

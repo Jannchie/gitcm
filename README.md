@@ -82,7 +82,7 @@ The default configuration is as follows:
     },
     "fix": {
       "display": "fix",
-      "emoji": ":bug:"
+      "emoji": ":adhesive_bandage:"
     },
     "hotfix": {
       "display": "hotfix",
