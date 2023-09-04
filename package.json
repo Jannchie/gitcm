@@ -11,6 +11,9 @@
     "build": "rollup -c",
     "publish": "pnpm run build && pnpm publish"
   },
+  "files": [
+    "lib/**/*"
+  ],
   "keywords": [
     "git",
     "commit",
