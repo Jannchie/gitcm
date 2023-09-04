@@ -8,7 +8,7 @@ import { consola } from 'consola'
 import defaultConfig from './config.json' assert { type: 'json' }
 
 program
-  .name('gitcm')
+  .name('git-commit')
   .usage('[type] [scope] [body]')
   .description('An opinionated git commit messages helper.')
   .option('-d, --dry-run', 'Dry run mode')
