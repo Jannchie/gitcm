@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import fs from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
@@ -79,6 +78,10 @@ async function confirm() {
   }
   const cmd = getCMD({ type: config.data[type].display, scope, body, icon: config.showIcon ? config.data[type].emoji : '' })
   const answer = options.yes ? true : await consola.prompt(`Are you sure to execute this command? (${cmd})`, { type: 'confirm', initial: true })
+  if (typeof answer === 'symbol') {
+    consola.info('Canceled')
+    process.exit(0)
+  }
   if (answer) {
     if (options.dryRun) {
       consola.info(`Dry run: ${cmd}`)
@@ -103,18 +106,30 @@ async function fillEmpty() {
     type = await consola.prompt('What is the commit type? (required)', { type: 'select', options: typeList })
 
     // check type is clack:cancel
-    if (typeof type === 'symbol')
+    if (typeof type === 'symbol') {
+      consola.info('Canceled')
       process.exit(0)
-
+    }
     if (!isType(type)) {
       consola.error(`Invalid commit type: ${type}`, `Commit type must be one of ${typeList.join(', ')}`)
       process.exit(1)
     }
   }
+
   if (scope === '' && args.length !== 2)
     scope = await consola.prompt('What is the commit scope? (optional)', { type: 'text', default: '', placeholder: 'Enter commit scope' })
+  // check type is clack:cancel
+  if (typeof scope === 'symbol') {
+    consola.info('Canceled')
+    process.exit(0)
+  }
+
   if (body === '')
     body = await consola.prompt('What is the commit for? (required)', { type: 'text', default: '', placeholder: 'Enter commit body' })
+  if (typeof body === 'symbol') {
+    consola.info('Canceled')
+    process.exit(0)
+  }
   if (body === '') {
     consola.error('Commit body must not be empty')
     process.exit(1)
