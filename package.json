@@ -1,22 +1,34 @@
 {
   "name": "@gitcm/cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "An opinionated git commits message helper.",
   "bin": {
-    "gitcm": "lib/index.js"
+    "gitcm": "lib/index.cjs"
   },
+  "type": "module",
   "scripts": {
-    "dev": "ts-node src/index.ts",
-    "build": "tsc",
+    "dev": "ts-node --esm src/index.ts",
+    "build": "rollup -c",
     "publish": "pnpm run build && pnpm publish"
   },
-  "keywords": ["git", "commit", "message", "cli"],
+  "keywords": [
+    "git",
+    "commit",
+    "message",
+    "cli"
+  ],
   "author": "Jianqi Pan <jannchie@gmail.com>",
   "license": "MIT",
   "devDependencies": {
     "@antfu/eslint-config": "^0.41.0",
+    "@rollup/plugin-commonjs": "^25.0.4",
+    "@rollup/plugin-json": "^6.0.0",
+    "@rollup/plugin-node-resolve": "^15.2.1",
+    "@rollup/plugin-terser": "^0.4.3",
+    "@rollup/plugin-typescript": "^11.1.3",
     "@types/node": "^20.5.9",
     "commander": "^11.0.0",
+    "rollup": "^3.28.1",
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2"
   },

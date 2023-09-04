@@ -2,14 +2,14 @@
   "compilerOptions": {
     /* Basic Options */
     "target": "ES2020",
-    "module": "CommonJS",
+    "module": "NodeNext",
     "lib": [
       "ES2020"
     ],
     "allowJs": true,
     "outDir": "./lib",
     "rootDir": "./src",
-    "moduleResolution": "node",
+    "moduleResolution": "NodeNext",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,

@@ -6,11 +6,7 @@ import { exec } from 'node:child_process'
 import os from 'node:os'
 import { program } from 'commander'
 import { consola } from 'consola'
-
-// make config file if not exists in ~/.config/gitcm/config.json
-// if exists, read config file
-// if not exists, make config file
-import defaultConfig from './config.json'
+import defaultConfig from './config.json' assert { type: 'json' }
 
 program
   .name('gitcm')
