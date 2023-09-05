@@ -70,87 +70,113 @@ The default configuration is as follows:
   "data": {
     "feat": {
       "display": "feat",
-      "emoji": ":sparkles:"
+      "emoji": ":sparkles:",
+      "selectable": true
     },
     "chore": {
       "display": "chore",
-      "emoji": ":wrench:"
-    },
-    "refactor": {
-      "display": "refactor",
-      "emoji": ":hammer:"
+      "emoji": ":wrench:",
+      "selectable": true
     },
     "fix": {
       "display": "fix",
-      "emoji": ":adhesive_bandage:"
+      "emoji": ":adhesive_bandage:",
+      "selectable": true
     },
-    "hotfix": {
-      "display": "hotfix",
-      "emoji": ":ambulance:"
-    },
-    "docs": {
-      "display": "docs",
-      "emoji": ":books:"
-    },
-    "i18n": {
-      "display": "i18n",
-      "emoji": ":globe_with_meridians:"
-    },
-    "build": {
-      "display": "build",
-      "emoji": ":building_construction:"
-    },
-    "version": {
-      "display": "version",
-      "emoji": ":bookmark:"
-    },
-    "test": {
-      "display": "test",
-      "emoji": ":rotating_light:"
-    },
-    "ci": {
-      "display": "ci",
-      "emoji": ":construction_worker:"
-    },
-    "cd": {
-      "display": "cd",
-      "emoji": ":construction_worker:"
-    },
-    "workflow": {
-      "display": "workflow",
-      "emoji": ":construction_worker:"
-    },
-    "wip": {
-      "display": "wip",
-      "emoji": ":construction_worker:"
-    },
-    "init": {
-      "display": "init",
-      "emoji": ":tada:"
+    "refactor": {
+      "display": "refactor",
+      "emoji": ":hammer:",
+      "selectable": true
     },
     "style": {
       "display": "style",
-      "emoji": ":art:"
+      "emoji": ":art:",
+      "selectable": true
     },
-    "docker": {
-      "display": "docker",
-      "emoji": ":whale:"
+    "move": {
+      "display": "move",
+      "emoji": ":truck:",
+      "selectable": true
     },
-    "revert": {
-      "display": "revert",
-      "emoji": ":rewind:"
+    "docs": {
+      "display": "docs",
+      "emoji": ":books:",
+      "selectable": true
     },
-    "config": {
-      "display": "config",
-      "emoji": ":wrench:"
+    "wip": {
+      "display": "wip",
+      "emoji": ":construction:",
+      "selectable": true
+    },
+    "init": {
+      "display": "init",
+      "emoji": ":tada:", 
+      "selectable": true
     },
     "release": {
       "display": "release",
-      "emoji": ":bookmark:"
+      "emoji": ":bookmark:",
+      "selectable": true
+    },
+    "hotfix": {
+      "display": "hotfix",
+      "emoji": ":ambulance:",
+      "selectable": false
+    },
+    "build": {
+      "display": "build",
+      "emoji": ":package:",
+      "selectable": false
+    },
+    "i18n": {
+      "display": "i18n",
+      "emoji": ":globe_with_meridians:",
+      "selectable": false
+    },
+    "test": {
+      "display": "test",
+      "emoji": ":rotating_light:",
+      "selectable": false
+    },
+    "ci": {
+      "display": "ci",
+      "emoji": ":robot:",
+      "selectable": false
+    },
+    "cd": {
+      "display": "cd",
+      "emoji": ":robot:",
+      "selectable": false
+    },
+    "workflow": {
+      "display": "workflow",
+      "emoji": ":robot:",
+      "selectable": false
+    },
+    "docker": {
+      "display": "docker",
+      "emoji": ":whale:",
+      "selectable": false
+    },
+    "revert": {
+      "display": "revert",
+      "emoji": ":rewind:",
+      "selectable": false
+    },
+    "config": {
+      "display": "config",
+      "emoji": ":wrench:",
+      "selectable": false
+    },
+    "version": {
+      "display": "version",
+      "emoji": ":bookmark:",
+      "selectable": false
     },
     "tag": {
       "display": "tag",
-      "emoji": ":bookmark:"
+      "emoji": ":bookmark:",
+      "selectable": false
     }
   }
 }
