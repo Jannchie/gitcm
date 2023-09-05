@@ -123,7 +123,7 @@ async function waitConfirm() {
   }
   const cmd = getCMD({ type: config.data[type].display, scope, body, icon: config.showIcon ? config.data[type].emoji : '' })
   note(cmd, 'Your commit command is')
-  const answer = options.yes ? true : await confirm({ message: 'Are you sure to execute this command?' })
+  const answer = config.needConfirm ? (options.yes ? true : await confirm({ message: 'Are you sure to execute this command?' })) : true
   if (isCancel(answer)) {
     log.info('Canceled by user')
     process.exit(0)
