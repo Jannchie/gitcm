@@ -139,10 +139,12 @@ async function waitConfirm() {
         await new Promise<void>((resolve, reject) => {
           exec(cmd, (err, stdout) => {
             if (err) {
+              s.stop()
               log.error(stdout)
               reject(err)
               return
             }
+            s.stop()
             log.success(stdout)
             resolve()
           })
