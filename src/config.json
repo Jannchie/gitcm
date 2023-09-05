@@ -1,6 +1,7 @@
 {
   "showIcon": true,
   "verbose": false,
+  "needConfirm": false,
   "data": {
     "feat": {
       "display": "feat",
