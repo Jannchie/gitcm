@@ -4,9 +4,27 @@ import process from 'node:process'
 import { exec } from 'node:child_process'
 import os from 'node:os'
 import { program } from 'commander'
-import { consola } from 'consola'
+import { confirm, intro, isCancel, log, note, select, spinner, text } from '@clack/prompts'
+import { emojify } from 'node-emoji'
 import defaultConfig from './config.json' assert { type: 'json' }
 
+const version = process.env.npm_package_version
+
+let config = defaultConfig
+const configPath = path.join(os.homedir(), '.config/gitcm/config.json')
+function getLatestVersion() {
+  return new Promise<string>((resolve, reject) => {
+    exec('npm view @gitcm/cli version', (err, stdout) => {
+      if (err) {
+        reject(err)
+        return
+      }
+      resolve(stdout.trim())
+    })
+  })
+}
+
+const latestVersionPromise = getLatestVersion()
 program
   .name('git-commit')
   .usage('[type] [scope] [body]')
@@ -18,19 +36,6 @@ program
   .arguments('[type] [scope] [body]')
 
 program.parse()
-
-let config = defaultConfig
-
-const configPath = path.join(os.homedir(), '~/.config/gitcm/config.json')
-if (!fs.existsSync(configPath)) {
-  const dir = path.dirname(configPath)
-  fs.mkdirSync(dir, { recursive: true })
-  consola.info(`Config file not found. Create config file in ${configPath}`)
-  fs.writeFileSync(configPath, JSON.stringify(config, null, 2))
-}
-else {
-  config = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
-}
 
 const options = program.opts()
 config.showIcon = !options.noIcon
@@ -54,6 +59,28 @@ if (args.length > 0) {
 }
 const typeList = Object.keys(config.data)
 
+function getDisplay(type: string) {
+  if (!isType(type))
+    return type
+  return config.data[type].display
+}
+
+function isSelectable(type: string) {
+  if (!isType(type))
+    return false
+  return config.data[type].selectable
+}
+
+function getEmoji(type: string) {
+  if (!isType(type))
+    return ''
+  switch (config.data[type].emoji) {
+    case ':adhesive_bandage:':
+      return '🩹'
+  }
+  return emojify(config.data[type].emoji)
+}
+
 function isType(key: string): key is keyof typeof config.data {
   return key in config.data
 }
@@ -65,74 +92,136 @@ function getCMD({ type, scope, body, icon }: { type: string; body: string; scope
 }
 
 async function waitPrompt() {
+  intro(`@gitcm/cli - v${version}`)
+
+  if (!fs.existsSync(configPath)) {
+    const dir = path.dirname(configPath)
+    fs.mkdirSync(dir, { recursive: true })
+    log.info(`Config file not found. Create config file in ${configPath}`)
+    fs.writeFileSync(configPath, JSON.stringify(config, null, 2))
+  }
+  else {
+    log.info(`Config file found in ${configPath}`)
+    config = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
+  }
+
+  if (type !== '' && !isType(type)) {
+    log.error(`Invalid commit type: ${type}. ` + `Commit type must be one of ${typeList.join(', ')}`)
+    process.exit(1)
+  }
   if (!options.yes)
     await fillEmpty()
-
-  await confirm()
+  await waitConfirm()
+  await checkNewVersion()
+  log.info('Done')
 }
 
-async function confirm() {
+async function waitConfirm() {
   if (!isType(type)) {
-    consola.error(`Invalid commit type: ${type}`, `Commit type must be one of ${typeList.join(', ')}`)
+    log.error(`Invalid commit type: ${type}. ` + `Commit type must be one of ${typeList.join(', ')}`)
     process.exit(1)
   }
   const cmd = getCMD({ type: config.data[type].display, scope, body, icon: config.showIcon ? config.data[type].emoji : '' })
-  const answer = options.yes ? true : await consola.prompt(`Are you sure to execute this command? (${cmd})`, { type: 'confirm', initial: true })
-  if (typeof answer === 'symbol') {
-    consola.info('Canceled')
+  note(cmd, 'Your commit command is')
+  const answer = options.yes ? true : await confirm({ message: 'Are you sure to execute this command?' })
+  if (isCancel(answer)) {
+    log.info('Canceled by user')
     process.exit(0)
   }
   if (answer) {
     if (options.dryRun) {
-      consola.info(`Dry run: ${cmd}`)
+      log.info(`Dry run: ${cmd}`)
     }
     else {
-      exec(cmd, (err, stdout) => {
-        if (err) {
-          consola.error(stdout)
-          return
-        }
-        consola.success(stdout)
-      })
+      const s = spinner()
+      s.start('Executing')
+      try {
+        await new Promise<void>((resolve, reject) => {
+          exec(cmd, (err, stdout) => {
+            if (err) {
+              log.error(stdout)
+              reject(err)
+              return
+            }
+            log.success(stdout)
+            resolve()
+          })
+        })
+      }
+      catch (e) {
+        log.error(`${e}`)
+        process.exit(1)
+      }
+      finally {
+        s.stop()
+      }
     }
   }
   else {
-    consola.info('Canceled')
+    log.info('Canceled by user')
   }
 }
 
 async function fillEmpty() {
   if (type === '') {
-    type = await consola.prompt('What is the commit type? (required)', { type: 'select', options: typeList })
-
-    // check type is clack:cancel
-    if (typeof type === 'symbol') {
-      consola.info('Canceled')
+    const typeRes = await select<{ value: string; label: string }[], string>({
+      message: 'What is the commit type? (required)',
+      options: typeList.filter(isSelectable).map((d) => {
+        return {
+          value: d,
+          label: `${getEmoji(d)} ${getDisplay(d)}`,
+        }
+      }),
+    })
+    if (isCancel(typeRes)) {
+      log.info('Canceled by user')
       process.exit(0)
     }
+    type = typeRes
     if (!isType(type)) {
-      consola.error(`Invalid commit type: ${type}`, `Commit type must be one of ${typeList.join(', ')}`)
+      log.error(`Invalid commit type: ${type}. ` + `Commit type must be one of ${typeList.join(', ')}`)
       process.exit(1)
     }
   }
 
-  if (scope === '' && args.length !== 2)
-    scope = await consola.prompt('What is the commit scope? (optional)', { type: 'text', default: '', placeholder: 'Enter commit scope' })
-  // check type is clack:cancel
-  if (typeof scope === 'symbol') {
-    consola.info('Canceled')
-    process.exit(0)
+  if (scope === '' && args.length !== 2) {
+    const res = await text({
+      message: 'What is the commit scope? (optional)',
+      placeholder: 'No scope',
+      defaultValue: '',
+    })
+    if (isCancel(res)) {
+      log.info('Canceled by user')
+      process.exit(0)
+    }
+    scope = res.trim()
   }
 
-  if (body === '')
-    body = await consola.prompt('What is the commit for? (required)', { type: 'text', default: '', placeholder: 'Enter commit body' })
-  if (typeof body === 'symbol') {
-    consola.info('Canceled')
-    process.exit(0)
-  }
   if (body === '') {
-    consola.error('Commit body must not be empty')
-    process.exit(1)
+    const res = await text({
+      message: 'What is the commit body? (required)',
+      placeholder: 'Enter commit body',
+      defaultValue: '',
+      validate: (value) => {
+        if (value.trim() === '')
+          return 'Commit body cannot be empty'
+      },
+    })
+    if (isCancel(res)) {
+      log.info('Canceled by user')
+      process.exit(0)
+    }
+    body = res.trim()
   }
 }
+
+async function checkNewVersion() {
+  const s = spinner()
+  s.start('Checking new version')
+  const latestVersion = await latestVersionPromise
+  if (latestVersion === version)
+    note(`New version v${latestVersion} is available. Run "npm i -g @gitcm/cli" to update`)
+  s.stop()
+}
+
 waitPrompt()
