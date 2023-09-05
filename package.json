@@ -9,8 +9,7 @@
   "type": "module",
   "scripts": {
     "dev": "ts-node --esm src/index.ts",
-    "build": "rollup -c",
-    "publish": "pnpm run build && pnpm publish"
+    "build": "rollup -c"
   },
   "files": [
     "lib/**/*"
