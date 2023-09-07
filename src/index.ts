@@ -214,9 +214,13 @@ async function checkNewVersion() {
   const s = spinner()
   s.start('Checking new version')
   const latestVersion = await latestVersionPromise
-  if (latestVersion !== version)
+  if (latestVersion !== version) {
     note(`New version v${latestVersion} is available. Run "npm i -g @gitcm/cli" to update`)
-  s.stop()
+    s.stop('New version available')
+  }
+  else {
+    s.stop('Version is up to date')
+  }
 }
 
 waitPrompt()
