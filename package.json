@@ -3,8 +3,8 @@
   "version": "0.1.3",
   "description": "An opinionated git commits message helper.",
   "bin": {
-    "gitcm": "lib/index.cjs",
-    "git-commit": "lib/index.cjs"
+    "gitcm": "lib/index.js",
+    "git-commit": "lib/index.js"
   },
   "type": "module",
   "scripts": {

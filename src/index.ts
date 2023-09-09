@@ -223,4 +223,4 @@ async function checkNewVersion() {
   }
 }
 
-waitPrompt()
+await waitPrompt()
