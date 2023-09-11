@@ -1,5 +1,5 @@
 {
-  "showIcon": true,
+  "showIcon": false,
   "verbose": false,
   "needConfirm": false,
   "data": {
@@ -18,24 +18,34 @@
       "emoji": ":adhesive_bandage:",
       "selectable": true
     },
-    "refactor": {
-      "display": "refactor",
-      "emoji": ":hammer:",
-      "selectable": true
-    },
     "style": {
       "display": "style",
       "emoji": ":art:",
       "selectable": true
     },
-    "move": {
-      "display": "move",
-      "emoji": ":truck:",
+    "refactor": {
+      "display": "refactor",
+      "emoji": ":hammer:",
+      "selectable": true
+    },
+    "pref": {
+      "display": "pref",
+      "emoji": ":zap:",
+      "selectable": true
+    },
+    "ci": {
+      "display": "ci",
+      "emoji": ":robot:",
       "selectable": true
     },
     "docs": {
       "display": "docs",
       "emoji": ":books:",
+      "selectable": true
+    },
+    "test": {
+      "display": "test",
+      "emoji": ":rotating_light:",
       "selectable": true
     },
     "wip": {
@@ -45,13 +55,18 @@
     },
     "init": {
       "display": "init",
-      "emoji": ":tada:", 
+      "emoji": ":tada:",
       "selectable": true
     },
     "release": {
       "display": "release",
       "emoji": ":bookmark:",
       "selectable": true
+    },
+    "move": {
+      "display": "move",
+      "emoji": ":truck:",
+      "selectable": false
     },
     "hotfix": {
       "display": "hotfix",
@@ -66,16 +81,6 @@
     "i18n": {
       "display": "i18n",
       "emoji": ":globe_with_meridians:",
-      "selectable": false
-    },
-    "test": {
-      "display": "test",
-      "emoji": ":rotating_light:",
-      "selectable": false
-    },
-    "ci": {
-      "display": "ci",
-      "emoji": ":robot:",
       "selectable": false
     },
     "cd": {
