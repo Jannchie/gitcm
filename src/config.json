@@ -28,8 +28,8 @@
       "emoji": ":hammer:",
       "selectable": true
     },
-    "pref": {
-      "display": "pref",
+    "perf": {
+      "display": "perf",
       "emoji": ":racehorse:",
       "selectable": true
     },
