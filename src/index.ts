@@ -24,6 +24,18 @@ function getLatestVersion() {
   })
 }
 
+if (!fs.existsSync(configPath)) {
+  const dir = path.dirname(configPath)
+  fs.mkdirSync(dir, { recursive: true })
+  log.info(`Config file not found. Create config file in ${configPath}`)
+  fs.writeFileSync(configPath, JSON.stringify({}, null, 2))
+}
+else {
+  log.info(`Config file found in ${configPath}`)
+  const userConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8')) as typeof config
+  config = { ...config, ...userConfig }
+}
+
 const latestVersionPromise = getLatestVersion()
 program
   .name('git-commit')
@@ -93,17 +105,6 @@ function getCMD({ type, scope, body, icon }: { type: string; body: string; scope
 
 async function waitPrompt() {
   intro(`@gitcm/cli - v${version}`)
-
-  if (!fs.existsSync(configPath)) {
-    const dir = path.dirname(configPath)
-    fs.mkdirSync(dir, { recursive: true })
-    log.info(`Config file not found. Create config file in ${configPath}`)
-    fs.writeFileSync(configPath, JSON.stringify(config, null, 2))
-  }
-  else {
-    log.info(`Config file found in ${configPath}`)
-    config = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
-  }
 
   if (type !== '' && !isType(type)) {
     log.error(`Invalid commit type: ${type}. ` + `Commit type must be one of ${typeList.join(', ')}`)
