@@ -12,7 +12,7 @@ function getLanguageModel(env: Record<string, string>) {
 
 function getDiffOfCurrentGit() {
   return new Promise<string>((resolve, reject) => {
-    exec('git diff --cached', (err, stdout) => {
+    exec('git diff --cached -U0', (err, stdout) => {
       if (err) {
         reject(err)
         return
@@ -35,15 +35,32 @@ export async function generateByAI(config: Config, type: string, scope: string, 
   s.start('Check git status...')
   const diff = await getDiffOfCurrentGit()
   const lines = diff.split('\n')
-  if (diff.length > 2000 || lines.length > 60) {
+  if (diff.length > 3000 || lines.length > 60) {
     log.warn('The diff is too long. It\'s better to write the commit message by yourself.')
     process.exit(0)
   }
-  let prompt = `${diff} I will generate a commit message about above diff. It should has three parts: type, scope and message. The type is ${type}. \nThe git commit I will to generate is`
-  if (type === '')
-    prompt = `${diff}, I will generate a commit message about above diff. It should has three parts: type, scope and message. Type is one of ${typeList.join(', ')}.\nThe git commit I will to generate is`
-  s.message('Generating commit message...')
   const model = getLanguageModel(config.ai.env as Record<string, string>)
+
+  const p = `\`\`\`\n${diff}\`\`\`\nThis is a change diff I made, Use **one sentence** to summarize the type, scope, and content of the changes I made. Here is the summary: `
+
+  s.message('Describing...')
+  const descResp = await model.complete(p)
+  if (!descResp.success) {
+    log.error('AI response failed.')
+    process.exit(1)
+  }
+
+  if (verbose) {
+    log.info('Prompt is:')
+    log.message(p)
+    log.info('AI response is:')
+    log.message(descResp.data)
+  }
+
+  let prompt = `\`\`\`\n${descResp.data}\`\`\`\nThis is my change. The type is ${type}. The scope is ${scope === '' ? 'one word relate to it' : scope} \nThe git commit message for my changes would look like this:`
+  if (type === '')
+    prompt = `\`\`\`\n${descResp.data}\`\`\`\nThis is my change. The type of commit is in ${typeList.join(', ')}. The scope is one world \nThe git commit message for my changes would look like this:`
+  s.message('Generating commit message...')
 
   const textResp = await model.complete(prompt)
   if (!textResp.success) {
@@ -66,8 +83,10 @@ export async function generateByAI(config: Config, type: string, scope: string, 
     }
 
     const data = translatorResp.data
-    scope = data.scope
-    type = data.type
+    if (scope === '')
+      scope = data.scope
+    if (type === '')
+      type = data.type
     message = data.message
     const cmd = getCMD({ type, scope, body: message, icon: config.showIcon ? config.data[type].emoji : '' })
     s.stop('Generated')

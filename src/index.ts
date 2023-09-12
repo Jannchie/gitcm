@@ -96,7 +96,7 @@ program.parse()
 
 function checkAI() {
   if (hasEnv()) {
-    log.info('AI mode enabled')
+    log.info('Try to use LLM API to generate commit message.')
   }
   else {
     log.error('AI mode enabled but no env found.')
