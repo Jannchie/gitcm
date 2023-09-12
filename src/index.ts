@@ -7,6 +7,9 @@ import { program } from 'commander'
 import { confirm, intro, isCancel, log, note, outro, select, spinner, text } from '@clack/prompts'
 import { emojify } from 'node-emoji'
 import defaultConfig from './config.json' assert { type: 'json' }
+import type { Config } from './type.ts'
+import { generateByAI } from './ai.ts'
+import { getCMD } from './git.ts'
 
 const version = process.env.npm_package_version
 
@@ -24,59 +27,98 @@ function getLatestVersion() {
   })
 }
 
-if (!fs.existsSync(configPath)) {
-  const dir = path.dirname(configPath)
-  fs.mkdirSync(dir, { recursive: true })
-  log.info(`Config file not found. Create config file in ${configPath}`)
-  fs.writeFileSync(configPath, JSON.stringify({}, null, 2))
-}
-else {
-  log.info(`Config file found in ${configPath}`)
-  const userConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8')) as typeof config
-  config = { ...config, ...userConfig }
-}
-
+const userConfig: Partial<Config> = getUserConfig()
+config = { ...config, ...userConfig }
 const latestVersionPromise = getLatestVersion()
-
 const typeList = Object.keys(config.data)
 
 program
   .name('git-commit')
-  .usage('[type] [scope] [body]')
   .description('An opinionated git commit messages helper.')
   .option('-d, --dry-run', 'Dry run mode')
   .option('-y, --yes', 'Skip prompt')
   .option('-a, --ai', 'AI mode')
   .option('-no-i, --no-icon', 'Do not show icon')
+  .option('-v, --verbose', 'Verbose mode')
   .version(`v${version}`, '-V, --version', 'Output the current version')
-  .arguments('<type> [body|scope] [body]').action(async (type, scope = '', body = '') => {
+  .arguments('[type] [body|scope] [body]').action(async (type, scope = '', body = '') => {
     const options = program.opts()
     if (body === '') {
       body = scope
       scope = ''
     }
+    if (!type)
+      type = ''
     config.showIcon = !options.noIcon
     config.verbose = options.verbose
     config.ai.enabled = options.ai
     config.dryRun = options.dryRun
 
+    intro(`@gitcm/cli - v${version}`)
     if (config.ai.enabled) {
-      if (hasEnv()) {
-        log.info('AI mode enabled')
+      checkAI()
+      await generateByAI(config, type, scope, body)
+    }
+    else {
+      await waitPrompt(config, type, scope, body)
+    }
+  })
+  .command('env <name> <value>').action(async (name: string, value: string) => {
+    intro(`@gitcm/cli - v${version}`)
+    if (name === 'AZURE_OPENAI_API_KEY' || name === 'AZURE_OPENAI_ENDPOINT' || name === 'OPENAI_API_KEY' || name === 'OPENAI_ENDPOINT' || name === 'OPENAI_MODEL') {
+      const userConfig = getUserConfig()
+      if (!userConfig.ai) {
+        userConfig.ai = {
+          enabled: false,
+          env: {
+            [name]: value,
+          },
+        }
       }
       else {
-        log.error('AI mode enabled but no env found.')
-        log.message('Please set env variables AZURE_OPENAI_API_KEY and AZURE_OPENAI_ENDPOINT or OPENAI_API_KEY, OPENAI_ENDPOINT and OPENAI_MODEL\nYou can edit the config file at ~/.config/ai-cmd-runner/config.json\nOr, you can run the following command to set the env variables:')
-        log.message('  run env <name> <value>')
-        outro('')
-        process.exit(1)
+        if (!userConfig.ai.env)
+          userConfig.ai.env = {}
+        userConfig.ai.env[name] = value
       }
+      fs.writeFileSync(configPath, JSON.stringify(userConfig, null, 2))
+      log.success(`Set ${name} success`)
     }
-
-    await waitPrompt(config, type, scope, body)
+    else {
+      log.error(`Invalid env name: ${name}\nEnv name must be one of AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT, OPENAI_API_KEY, OPENAI_ENDPOINT, OPENAI_MODEL`)
+      outro('Please try again.')
+      process.exit(1)
+    }
+    outro('Done')
+    process.exit(0)
   })
 
 program.parse()
+
+function checkAI() {
+  if (hasEnv()) {
+    log.info('AI mode enabled')
+  }
+  else {
+    log.error('AI mode enabled but no env found.')
+    log.message('Please set env variables AZURE_OPENAI_API_KEY and AZURE_OPENAI_ENDPOINT or OPENAI_API_KEY, OPENAI_ENDPOINT and OPENAI_MODEL\nYou can edit the config file at ~/.config/gitcm/config.json\nOr, you can run the following command to set the env variables:')
+    log.message('   npx @gitcm/cli env <name> <value>\nor gitcm env <name> <value>\nor git-commit env <name> <value>')
+    outro('Please add env variables and try again.')
+    process.exit(1)
+  }
+}
+
+function getUserConfig() {
+  let userConfig: Partial<Config> = {}
+  if (!fs.existsSync(configPath)) {
+    const dir = path.dirname(configPath)
+    fs.mkdirSync(dir, { recursive: true })
+    fs.writeFileSync(configPath, JSON.stringify({}, null, 2))
+  }
+  else {
+    userConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
+  }
+  return userConfig
+}
 
 function getDisplay(type: string) {
   if (!isType(type))
@@ -102,12 +144,6 @@ function getEmoji(type: string) {
 
 function isType(key: string) {
   return typeList.includes(key)
-}
-
-function getCMD({ type, scope, body, icon }: { type: string; body: string; scope?: string; icon?: string }) {
-  if (!scope || scope === '')
-    return `git commit -m "${`${icon} `}${type}: ${body}"`
-  return `git commit -m "${`${icon} `}${type}(${scope}): ${body}"`
 }
 
 async function waitPrompt(config: Config, type: string, scope: string, body: string) {
@@ -232,18 +268,6 @@ async function checkNewVersion() {
   }
 }
 
-function getDiffOfCurrentGit() {
-  return new Promise<string>((resolve, reject) => {
-    exec('git diff --cached', (err, stdout) => {
-      if (err) {
-        reject(err)
-        return
-      }
-      resolve(stdout)
-    })
-  })
-}
-
 function hasEnv() {
   if (config.ai.env.AZURE_OPENAI_API_KEY && config.ai.env.AZURE_OPENAI_ENDPOINT) {
     // Azure
@@ -254,30 +278,4 @@ function hasEnv() {
     return true
   }
   return false
-}
-
-interface AIConfigEnv {
-  AZURE_OPENAI_API_KEY?: string
-  AZURE_OPENAI_ENDPOINT?: string
-  OPENAI_API_KEY?: string
-  OPENAI_ENDPOINT?: string
-  OPENAI_MODEL?: string
-}
-
-interface Config {
-  showIcon: boolean
-  verbose: boolean
-  needConfirm: boolean
-  dryRun: boolean
-  ai: {
-    enabled: boolean
-    env: AIConfigEnv
-  }
-  data: {
-    [key: string]: {
-      display: string
-      emoji: string
-      selectable: boolean
-    }
-  }
 }
