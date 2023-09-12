@@ -1,5 +1,30 @@
 # Changelog
 
+## v0.1.5
+
+[compare changes](https://github.com/Jannchie/gitcm/compare/v0.1.4...v0.1.5)
+
+### 🩹 Fixes
+
+- **config:** Load config correctly ([6c6f7c9](https://github.com/Jannchie/gitcm/commit/6c6f7c9))
+
+### 📖 Documentation
+
+- Update usage, examples and configuation ([65a5b47](https://github.com/Jannchie/gitcm/commit/65a5b47))
+- **changelog:** Update changelogs ([2c3d5ed](https://github.com/Jannchie/gitcm/commit/2c3d5ed))
+
+### 🏡 Chore
+
+- **config:** Update config ([764e907](https://github.com/Jannchie/gitcm/commit/764e907))
+
+### 🎨 Styles
+
+- **emoji:** Update perf emoji ([522e9e8](https://github.com/Jannchie/gitcm/commit/522e9e8))
+
+### ❤️ Contributors
+
+- Jannchie ([@Jannchie](http://github.com/Jannchie))
+
 ## v0.1.3...v0.1.4
 
 [compare changes](https://github.com/Jannchie/gitcm/compare/v0.1.3...v0.1.4)

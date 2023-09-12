@@ -1,6 +1,6 @@
 {
   "name": "@gitcm/cli",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "An opinionated git commits message helper.",
   "bin": {
     "gitcm": "lib/index.js",
