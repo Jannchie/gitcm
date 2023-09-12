@@ -4,13 +4,13 @@ import process from 'node:process'
 import { exec } from 'node:child_process'
 import os from 'node:os'
 import { program } from 'commander'
-import { confirm, intro, isCancel, log, note, select, spinner, text } from '@clack/prompts'
+import { confirm, intro, isCancel, log, note, outro, select, spinner, text } from '@clack/prompts'
 import { emojify } from 'node-emoji'
 import defaultConfig from './config.json' assert { type: 'json' }
 
 const version = process.env.npm_package_version
 
-let config = defaultConfig
+let config: Config = defaultConfig
 const configPath = path.join(os.homedir(), '.config/gitcm/config.json')
 function getLatestVersion() {
   return new Promise<string>((resolve, reject) => {
@@ -37,39 +37,46 @@ else {
 }
 
 const latestVersionPromise = getLatestVersion()
+
+const typeList = Object.keys(config.data)
+
 program
   .name('git-commit')
   .usage('[type] [scope] [body]')
   .description('An opinionated git commit messages helper.')
   .option('-d, --dry-run', 'Dry run mode')
   .option('-y, --yes', 'Skip prompt')
+  .option('-a, --ai', 'AI mode')
   .option('-no-i, --no-icon', 'Do not show icon')
   .version(`v${version}`, '-V, --version', 'Output the current version')
-  .arguments('[type] [scope] [body]')
+  .arguments('<type> [body|scope] [body]').action(async (type, scope = '', body = '') => {
+    const options = program.opts()
+    if (body === '') {
+      body = scope
+      scope = ''
+    }
+    config.showIcon = !options.noIcon
+    config.verbose = options.verbose
+    config.ai.enabled = options.ai
+    config.dryRun = options.dryRun
+
+    if (config.ai.enabled) {
+      if (hasEnv()) {
+        log.info('AI mode enabled')
+      }
+      else {
+        log.error('AI mode enabled but no env found.')
+        log.message('Please set env variables AZURE_OPENAI_API_KEY and AZURE_OPENAI_ENDPOINT or OPENAI_API_KEY, OPENAI_ENDPOINT and OPENAI_MODEL\nYou can edit the config file at ~/.config/ai-cmd-runner/config.json\nOr, you can run the following command to set the env variables:')
+        log.message('  run env <name> <value>')
+        outro('')
+        process.exit(1)
+      }
+    }
+
+    await waitPrompt(config, type, scope, body)
+  })
 
 program.parse()
-
-const options = program.opts()
-config.showIcon = !options.noIcon
-config.verbose = options.verbose
-
-const args = program.args
-
-let type = ''
-let scope = ''
-let body = ''
-
-if (args.length > 0) {
-  type = args[0]
-  if (args.length === 2) {
-    body = args[1]
-  }
-  else if (args.length === 3) {
-    scope = args[1]
-    body = args[2]
-  }
-}
-const typeList = Object.keys(config.data)
 
 function getDisplay(type: string) {
   if (!isType(type))
@@ -93,8 +100,8 @@ function getEmoji(type: string) {
   return emojify(config.data[type].emoji)
 }
 
-function isType(key: string): key is keyof typeof config.data {
-  return key in config.data
+function isType(key: string) {
+  return typeList.includes(key)
 }
 
 function getCMD({ type, scope, body, icon }: { type: string; body: string; scope?: string; icon?: string }) {
@@ -103,34 +110,33 @@ function getCMD({ type, scope, body, icon }: { type: string; body: string; scope
   return `git commit -m "${`${icon} `}${type}(${scope}): ${body}"`
 }
 
-async function waitPrompt() {
+async function waitPrompt(config: Config, type: string, scope: string, body: string) {
   intro(`@gitcm/cli - v${version}`)
 
   if (type !== '' && !isType(type)) {
     log.error(`Invalid commit type: ${type}. ` + `Commit type must be one of ${typeList.join(', ')}`)
     process.exit(1)
   }
-  if (!options.yes)
-    await fillEmpty()
-  await waitConfirm()
+  await fillEmpty(type, scope, body)
+  await waitConfirm(config, type, scope, body)
   await checkNewVersion()
   log.info('Done')
 }
 
-async function waitConfirm() {
+async function waitConfirm(config: Config, type: string, scope: string, body: string) {
   if (!isType(type)) {
     log.error(`Invalid commit type: ${type}. ` + `Commit type must be one of ${typeList.join(', ')}`)
     process.exit(1)
   }
   const cmd = getCMD({ type: config.data[type].display, scope, body, icon: config.showIcon ? config.data[type].emoji : '' })
   note(cmd, 'Your commit command is')
-  const answer = config.needConfirm ? (options.yes ? true : await confirm({ message: 'Are you sure to execute this command?' })) : true
+  const answer = config.needConfirm ? (!config.needConfirm ? true : await confirm({ message: 'Are you sure to execute this command?' })) : true
   if (isCancel(answer)) {
     log.info('Canceled by user')
     process.exit(0)
   }
   if (answer) {
-    if (options.dryRun) {
+    if (config.dryRun) {
       log.info(`Dry run: ${cmd}`)
     }
     else {
@@ -158,7 +164,7 @@ async function waitConfirm() {
   }
 }
 
-async function fillEmpty() {
+async function fillEmpty(type: string, scope?: string, body?: string) {
   if (type === '') {
     const typeRes = await select<{ value: string; label: string }[], string>({
       message: 'What is the commit type? (required)',
@@ -180,20 +186,22 @@ async function fillEmpty() {
     }
   }
 
-  if (scope === '' && args.length !== 2) {
-    const res = await text({
-      message: 'What is the commit scope? (optional)',
-      placeholder: 'No scope',
-      defaultValue: '',
-    })
-    if (isCancel(res)) {
-      log.info('Canceled by user')
-      process.exit(0)
+  if (body === '') {
+    if (!scope || scope === '') {
+      const res = await text({
+        message: 'What is the commit scope? (optional)',
+        placeholder: 'No scope',
+        defaultValue: '',
+      })
+      if (isCancel(res)) {
+        log.info('Canceled by user')
+        process.exit(0)
+      }
+      scope = res.trim()
     }
-    scope = res.trim()
   }
 
-  if (body === '') {
+  if (!body || body === '') {
     const res = await text({
       message: 'What is the commit body? (required)',
       placeholder: 'Enter commit body',
@@ -224,4 +232,52 @@ async function checkNewVersion() {
   }
 }
 
-await waitPrompt()
+function getDiffOfCurrentGit() {
+  return new Promise<string>((resolve, reject) => {
+    exec('git diff --cached', (err, stdout) => {
+      if (err) {
+        reject(err)
+        return
+      }
+      resolve(stdout)
+    })
+  })
+}
+
+function hasEnv() {
+  if (config.ai.env.AZURE_OPENAI_API_KEY && config.ai.env.AZURE_OPENAI_ENDPOINT) {
+    // Azure
+    return true
+  }
+  else if (config.ai.env.OPENAI_API_KEY && config.ai.env.OPENAI_ENDPOINT && config.ai.env.OPENAI_MODEL) {
+    // OpenAI
+    return true
+  }
+  return false
+}
+
+interface AIConfigEnv {
+  AZURE_OPENAI_API_KEY?: string
+  AZURE_OPENAI_ENDPOINT?: string
+  OPENAI_API_KEY?: string
+  OPENAI_ENDPOINT?: string
+  OPENAI_MODEL?: string
+}
+
+interface Config {
+  showIcon: boolean
+  verbose: boolean
+  needConfirm: boolean
+  dryRun: boolean
+  ai: {
+    enabled: boolean
+    env: AIConfigEnv
+  }
+  data: {
+    [key: string]: {
+      display: string
+      emoji: string
+      selectable: boolean
+    }
+  }
+}

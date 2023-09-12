@@ -2,6 +2,11 @@
   "showIcon": false,
   "verbose": false,
   "needConfirm": false,
+  "dryRun": false,
+  "ai": {
+    "enabled": false,
+    "env": {}
+  },
   "data": {
     "feat": {
       "display": "feat",
