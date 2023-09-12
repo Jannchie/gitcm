@@ -44,7 +44,7 @@ program
   .option('-d, --dry-run', 'Dry run mode')
   .option('-y, --yes', 'Skip prompt')
   .option('-no-i, --no-icon', 'Do not show icon')
-  .version('v0.1.0', '-V, --version', 'Output the current version')
+  .version(`v${version}`, '-V, --version', 'Output the current version')
   .arguments('[type] [scope] [body]')
 
 program.parse()
