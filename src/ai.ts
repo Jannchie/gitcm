@@ -2,7 +2,7 @@ import { exec } from 'node:child_process'
 import process from 'node:process'
 import { createJsonTranslator, createLanguageModel } from 'typechat'
 import { confirm, isCancel, log, note, spinner } from '@clack/prompts'
-import type { AIConfigEnv, Config } from './type.ts'
+import type { Config } from './type.ts'
 import { getCMD } from './git.ts'
 
 function getLanguageModel(env: Record<string, string>) {
