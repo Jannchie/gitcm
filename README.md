@@ -58,10 +58,17 @@ You can also set the type, scope and body with command-line arguments:
 
 ```bash
 # git commit -m ":sparkles: feat(test): test commit"
-$ gitcm feat test "test commit" 
+gitcm feat test "test commit" 
 
 # git commit -m ":sparkles: feat: test commit"
-$ gitcm feat "test commit" 
+gitcm feat "test commit" 
+```
+
+We provide an AI-powered commit message generator.
+
+```bash
+# Generate a commit message with OpenAI ChatGPT API
+gitcm -a
 ```
 
 You can find help with the following command:
