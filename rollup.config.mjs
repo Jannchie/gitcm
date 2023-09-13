@@ -11,7 +11,9 @@ export default {
   output: {
     file: 'lib/index.js',
     format: 'es',
-    banner: '#!/usr/bin/env node',
+    banner: `#!/usr/bin/env node
+import { fileURLToPath } from 'url'
+global['__filename'] = fileURLToPath(import.meta.url)`,
     inlineDynamicImports: true,
   },
   plugins: [
