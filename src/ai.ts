@@ -28,7 +28,7 @@ export interface CommitMessageData {
   message: string
 }
 
-export async function generateByAI(config: Config, type: string, scope: string, message: string) {
+export async function generateByAI(config: Config, type: string, scope: string) {
   const typeList = Object.keys(config.data)
   const verbose = config.verbose
   const s = spinner()
@@ -96,7 +96,7 @@ Based on the information above, type, scope and message respectively:
       scope = data.scope.toLowerCase()
     if (type === '')
       type = data.type.toLowerCase()
-    message = data.message
+    let message = data.message
     message = message[0].toLowerCase() + message.slice(1)
     const cmd = getCMD({ type, scope, body: message, icon: config.showIcon ? config.data[type].emoji : '' })
     s.stop('Generated')
@@ -108,6 +108,7 @@ Based on the information above, type, scope and message respectively:
     }
     if (config.dryRun) {
       log.info(`Dry run: ${cmd}`)
+      process.exit(0)
     }
     else {
       await new Promise<void>((resolve, reject) => {
@@ -121,6 +122,7 @@ Based on the information above, type, scope and message respectively:
           resolve()
         })
       })
+      process.exit(0)
     }
   }
   catch (e) {

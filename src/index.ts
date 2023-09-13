@@ -41,14 +41,8 @@ program
   .option('-no-i, --no-icon', 'Do not show icon')
   .option('-v, --verbose', 'Verbose mode')
   .version(`v${version}`, '-V, --version', 'Output the current version')
-  .arguments('[type] [body|scope] [body]').action(async (type, scope = '', body = '') => {
+  .arguments('[type] [body|scope] [body]').action(async (type = '', scope = '', body = '') => {
     const options = program.opts()
-    if (body === '') {
-      body = scope
-      scope = ''
-    }
-    if (!type)
-      type = ''
     config.showIcon = !options.noIcon
     config.verbose = options.verbose
     config.ai.enabled = options.ai
@@ -57,9 +51,13 @@ program
     intro(`@gitcm/cli - v${version}`)
     if (config.ai.enabled) {
       checkAI()
-      await generateByAI(config, type, scope, body)
+      await generateByAI(config, type, scope)
     }
     else {
+      if (body === '') {
+        body = scope
+        scope = ''
+      }
       await waitPrompt(config, type, scope, body)
     }
   })
@@ -147,8 +145,6 @@ function isType(key: string) {
 }
 
 async function waitPrompt(config: Config, type: string, scope: string, body: string) {
-  intro(`@gitcm/cli - v${version}`)
-
   if (type !== '' && !isType(type)) {
     log.error(`Invalid commit type: ${type}. ` + `Commit type must be one of ${typeList.join(', ')}`)
     process.exit(1)
