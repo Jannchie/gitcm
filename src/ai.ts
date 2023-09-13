@@ -22,6 +22,34 @@ function getDiffOfCurrentGit() {
   })
 }
 
+async function parseCommit() {
+  const commitRegex = /(?<emoji>:.+:|(\uD83C[\uDF00-\uDFFF])|(\uD83D[\uDC00-\uDE4F\uDE80-\uDEFF])|[\u2600-\u2B55])?( *)?(?<type>[a-z]+)(\((?<scope>.+)\))?(?<breaking>!)?: (?<description>.+)/i
+  const commits = await getGitCommitList()
+  function isNotNull<T>(x: T | null): x is T {
+    return x !== null
+  }
+  const parsedCommits = commits.map((commit) => {
+    const match = commit.match(commitRegex)
+    if (!match?.groups)
+      return null
+    return match.groups
+  }).filter(isNotNull)
+  return parsedCommits as { emoji: string; type: string; scope: string; breaking: string; description: string }[]
+}
+
+async function getGitCommitList(n: number = 30) {
+  const resp = await new Promise<string>((resolve, reject) => {
+    exec(`git log -${n} --pretty=format:"%s"`, (err, stdout) => {
+      if (err) {
+        reject(err)
+        return
+      }
+      resolve(stdout)
+    })
+  })
+  return resp.split('\n')
+}
+
 export interface CommitMessageData {
   type: string
   scope: string
@@ -29,6 +57,8 @@ export interface CommitMessageData {
 }
 
 export async function generateByAI(config: Config, type: string, scope: string) {
+  const commits = await parseCommit()
+  const scopeExample = [...new Set(commits.map(commit => commit.scope))].filter(scope => scope !== undefined && scope !== '')
   const typeList = Object.keys(config.data)
   const verbose = config.verbose
   const s = spinner()
@@ -41,7 +71,7 @@ export async function generateByAI(config: Config, type: string, scope: string) 
   }
   const model = getLanguageModel(config.ai.env as Record<string, string>)
 
-  const p = `\`\`\`\n${diff}\`\`\`\nThis is a change diff I made, Use **one sentence** to summarize the type, scope, and content of the changes I made. Here is the summary: `
+  const p = `\`\`\`\n${diff}\`\`\`\nThis is a change I made, Use **one sentence** to summarize the type, scope, and content of the changes I made. Here is the summary: `
 
   s.message('Describing...')
   const descResp = await model.complete(p)
@@ -60,13 +90,15 @@ export async function generateByAI(config: Config, type: string, scope: string) 
   let prompt = `\`\`\`\n${descResp.data}\`\`\`\nThis is my change. 
 I need to extract three of these elements from the summary: type, scope, and message.
 The type should be ${type}. 
-The scope should be ${scope === '' ? 'one word relate to it' : scope}.
+The scope should be ${scope === '' ? `a noun or multiple comma-separated nouns(e.g. ${scopeExample.join(', ')}).` : scope}, it should not be empty, 'N/A' or 'None'.
+The message contains only few words.
 Based on the information above, type, scope and message respectively:`
   if (type === '') {
     prompt = `\`\`\`\n${descResp.data}\`\`\`\nThis is my change.
 I need to extract three of these elements from the summary: type, scope, and message.
 The type of commit is in ${typeList.join(', ')}. 
-The scope is a word.
+The scope should be a noun or multiple comma-separated nouns(e.g. ${scopeExample.join(', ')}), it should not be empty, 'N/A' or 'None'.
+The message contains only few words.
 Based on the information above, type, scope and message respectively:
 `
   }
