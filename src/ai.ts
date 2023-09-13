@@ -57,9 +57,19 @@ export async function generateByAI(config: Config, type: string, scope: string, 
     log.message(descResp.data)
   }
 
-  let prompt = `\`\`\`\n${descResp.data}\`\`\`\nThis is my change. The type is ${type}. The scope is ${scope === '' ? 'one word relate to it' : scope} \nThe git commit message for my changes would look like this:`
-  if (type === '')
-    prompt = `\`\`\`\n${descResp.data}\`\`\`\nThis is my change. The type of commit is in ${typeList.join(', ')}. The scope is one world \nThe git commit message for my changes would look like this:`
+  let prompt = `\`\`\`\n${descResp.data}\`\`\`\nThis is my change. 
+I need to extract three of these elements from the summary: type, scope, and message.
+The type should be ${type}. 
+The scope should be ${scope === '' ? 'one word relate to it' : scope}.
+Based on the information above, type, scope and message respectively:`
+  if (type === '') {
+    prompt = `\`\`\`\n${descResp.data}\`\`\`\nThis is my change.
+I need to extract three of these elements from the summary: type, scope, and message.
+The type of commit is in ${typeList.join(', ')}. 
+The scope is a word.
+Based on the information above, type, scope and message respectively:
+`
+  }
   s.message('Generating commit message...')
 
   const textResp = await model.complete(prompt)
@@ -81,13 +91,13 @@ export async function generateByAI(config: Config, type: string, scope: string, 
       log.error('AI response failed.')
       process.exit(1)
     }
-
     const data = translatorResp.data
     if (scope === '')
-      scope = data.scope
+      scope = data.scope.toLowerCase()
     if (type === '')
-      type = data.type
+      type = data.type.toLowerCase()
     message = data.message
+    message = message[0].toLowerCase() + message.slice(1)
     const cmd = getCMD({ type, scope, body: message, icon: config.showIcon ? config.data[type].emoji : '' })
     s.stop('Generated')
     note(cmd, 'The AI generated commit command is')
