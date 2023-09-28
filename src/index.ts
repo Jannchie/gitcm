@@ -149,13 +149,13 @@ async function waitPrompt(config: Config, type: string, scope: string, body: str
     log.error(`Invalid commit type: ${type}. ` + `Commit type must be one of ${typeList.join(', ')}`)
     process.exit(1)
   }
-  await fillEmpty(type, scope, body)
-  await waitConfirm(config, type, scope, body)
+  const { type: t, scope: s, body: b } = await fillEmpty(type, scope, body)
+  await waitConfirm(config, t, s, b)
   await checkNewVersion()
   log.info('Done')
 }
 
-async function waitConfirm(config: Config, type: string, scope: string, body: string) {
+async function waitConfirm(config: Config, type: string, scope: string | undefined, body: string) {
   if (!isType(type)) {
     log.error(`Invalid commit type: ${type}. ` + `Commit type must be one of ${typeList.join(', ')}`)
     process.exit(1)
@@ -249,6 +249,7 @@ async function fillEmpty(type: string, scope?: string, body?: string) {
     }
     body = res.trim()
   }
+  return { type, scope, body }
 }
 
 async function checkNewVersion() {
