@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.8
+
+[compare changes](https://github.com/Jannchie/gitcm/compare/v0.1.7...v0.1.8)
+
 ## v0.1.7
 
 [compare changes](https://github.com/Jannchie/gitcm/compare/v0.1.6...v0.1.7)
