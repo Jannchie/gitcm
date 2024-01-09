@@ -1,7 +1,7 @@
 {
   "name": "@gitcm/cli",
   "type": "module",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "An opinionated git commits message helper.",
   "author": "Jianqi Pan <jannchie@gmail.com>",
   "license": "MIT",

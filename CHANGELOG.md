@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.1.7
+
+[compare changes](https://github.com/Jannchie/gitcm/compare/v0.1.6...v0.1.7)
+
+### 🚀 Enhancements
+
+- check update one time in one day ([1626383](https://github.com/Jannchie/gitcm/commit/1626383))
+
 ## v0.1.6
 
 [compare changes](https://github.com/Jannchie/gitcm/compare/v0.1.5...v0.1.6)
