@@ -2,21 +2,21 @@
   "compilerOptions": {
     /* Basic Options */
     "target": "ES2020",
-    "module": "NodeNext",
     "lib": [
       "ES2020"
     ],
-    "allowJs": true,
-    "outDir": "./lib",
     "rootDir": "./src",
+    "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
-    "noEmit": true
+    "allowJs": true,
+    "strict": true,
+    "noEmit": true,
+    "outDir": "./lib",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
   },
   "include": [
     "src"

@@ -150,8 +150,23 @@ async function waitPrompt(config: Config, type: string, scope: string, body: str
     process.exit(1)
   }
   const { type: t, scope: s, body: b } = await fillEmpty(type, scope, body)
-  await waitConfirm(config, t, s, b)
-  await checkNewVersion()
+
+  const LAST_CHECK_FILE = path.join(os.homedir(), '.config/gitcm/lastCheckTime.txt')
+  let lastCheckTime = null
+  if (fs.existsSync(LAST_CHECK_FILE))
+    lastCheckTime = new Date(fs.readFileSync(LAST_CHECK_FILE, 'utf8'))
+  else
+    lastCheckTime = null
+
+  const now = new Date()
+  const oneDay = 24 * 60 * 60 * 1000 // 一天的毫秒数
+
+  if (lastCheckTime === null || (now.getTime() - lastCheckTime.getTime() > oneDay)) {
+    await waitConfirm(config, t, s, b)
+    await checkNewVersion()
+    lastCheckTime = new Date()
+    fs.writeFileSync(LAST_CHECK_FILE, lastCheckTime.toISOString())
+  }
   log.info('Done')
 }
 
@@ -198,7 +213,7 @@ async function waitConfirm(config: Config, type: string, scope: string | undefin
 
 async function fillEmpty(type: string, scope?: string, body?: string) {
   if (type === '') {
-    const typeRes = await select<{ value: string; label: string }[], string>({
+    const typeRes = await select<{ value: string, label: string }[], string>({
       message: 'What is the commit type? (required)',
       options: typeList.filter(isSelectable).map((d) => {
         return {

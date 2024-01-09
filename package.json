@@ -1,44 +1,44 @@
 {
   "name": "@gitcm/cli",
+  "type": "module",
   "version": "0.1.6",
   "description": "An opinionated git commits message helper.",
-  "bin": {
-    "gitcm": "lib/index.js",
-    "git-commit": "lib/index.js"
-  },
-  "type": "module",
-  "scripts": {
-    "dev": "ts-node --esm src/index.ts",
-    "build": "rollup -c"
-  },
-  "files": [
-    "lib/**/*"
-  ],
+  "author": "Jianqi Pan <jannchie@gmail.com>",
+  "license": "MIT",
   "keywords": [
     "git",
     "commit",
     "message",
     "cli"
   ],
-  "author": "Jianqi Pan <jannchie@gmail.com>",
-  "license": "MIT",
-  "devDependencies": {
-    "@antfu/eslint-config": "^0.41.0",
-    "@clack/prompts": "^0.7.0",
-    "@rollup/plugin-commonjs": "^25.0.4",
-    "@rollup/plugin-json": "^6.0.0",
-    "@rollup/plugin-node-resolve": "^15.2.1",
-    "@rollup/plugin-replace": "^5.0.2",
-    "@rollup/plugin-terser": "^0.4.3",
-    "@rollup/plugin-typescript": "^11.1.3",
-    "@types/node": "^20.5.9",
-    "commander": "^11.0.0",
-    "node-emoji": "^2.1.0",
-    "rollup": "^3.28.1",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.2.2"
+  "bin": {
+    "gitcm": "lib/index.js",
+    "git-commit": "lib/index.js"
+  },
+  "files": [
+    "lib/**/*"
+  ],
+  "scripts": {
+    "dev": "ts-node --esm src/index.ts",
+    "build": "rollup -c"
   },
   "dependencies": {
     "typechat": "^0.0.10"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^2.6.2",
+    "@clack/prompts": "^0.7.0",
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-replace": "^5.0.5",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^11.1.5",
+    "@types/node": "^20.10.7",
+    "commander": "^11.1.0",
+    "node-emoji": "^2.1.3",
+    "rollup": "^4.9.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
   }
 }
