@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.1.9
+
+[compare changes](https://github.com/Jannchie/gitcm/compare/v0.1.8...v0.1.9)
+
+### 🩹 Fixes
+
+- **base:** Not await confirm unexpectedly ([0bb014d](https://github.com/Jannchie/gitcm/commit/0bb014d))
+
+### ❤️ Contributors
+
+- Jianqi Pan ([@Jannchie](http://github.com/Jannchie))
+
 ## v0.1.8
 
 [compare changes](https://github.com/Jannchie/gitcm/compare/v0.1.7...v0.1.8)
