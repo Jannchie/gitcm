@@ -161,8 +161,8 @@ async function waitPrompt(config: Config, type: string, scope: string, body: str
   const now = new Date()
   const oneDay = 24 * 60 * 60 * 1000 // 一天的毫秒数
 
+  await waitConfirm(config, t, s, b)
   if (lastCheckTime === null || (now.getTime() - lastCheckTime.getTime() > oneDay)) {
-    await waitConfirm(config, t, s, b)
     await checkNewVersion()
     lastCheckTime = new Date()
     fs.writeFileSync(LAST_CHECK_FILE, lastCheckTime.toISOString())
